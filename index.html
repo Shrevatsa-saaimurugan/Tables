@@ -105,14 +105,11 @@
             font-size: 1.1em;
             padding: 10px;
             border-radius: 8px;
-            transition: background-color 0.3s;
         }
         .feedback.correct {
-            background-color: #d1fae5;
             color: #065f46;
         }
         .feedback.incorrect {
-            background-color: #fee2e2;
             color: #991b1b;
         }
         .history {
@@ -128,7 +125,6 @@
             margin-top: 10px;
             font-size: 0.9em;
             max-height: 150px;
-            overflow-y: auto;
             border-top: 1px solid #ddd;
             padding-top: 10px;
             color: #444;
@@ -208,16 +204,16 @@
             <div class="progress-bar" id="progressBar"></div>
         </div>
         
-        <div class="feedback" id="feedbackMessage"></div>
 
+        <button class="print-btn" onclick="printResults()" style="display: none;" id="printButton">Print Results</button>
+		<p>Developed by, Shrevatsa, 10th Grade, Narayana Olympiad School, Pallikarani", Incase of issues, please email "shrevatsas@gmail.com"</p>
+
+        <div class="feedback" id="feedbackMessage"></div>
         <div class="history" id="historySection">
             <h3>Answer History</h3>
             <div class="history-list" id="historyList"></div>
-            <button class="print-btn" onclick="printHistory()">Print History</button>
         </div>
         
-        <button class="print-btn" onclick="printResults()" style="display: none;" id="printButton">Print Results</button>
-		<p>Developed by, Shrevatsa, 10th Grade, Narayana Olympiad School, Pallikarani", Incase of issues, please email "shrevatsas@gmail.com"</p>
     </div>
 
     <script>
