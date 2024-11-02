@@ -229,7 +229,7 @@
         const maxQuestions = 30;
 
         function startCountdown() {
-            let countdown = 3;
+            let countdown = 5;
             const countdownElement = document.getElementById("countdown");
             countdownElement.innerText = "Starting in... " + countdown;
 
@@ -263,10 +263,10 @@
             document.getElementById("timer").innerText = timerCount;
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                if (!isPaused && timerCount < 5) {
+                if (!isPaused && timerCount < 7) {
                     timerCount++;
                     document.getElementById("timer").innerText = timerCount;
-                } else if (timerCount >= 5) {
+                } else if (timerCount >= 7) {
                     clearInterval(timerInterval);
                     markIncorrect();
                 }
