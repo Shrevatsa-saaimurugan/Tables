@@ -227,10 +227,6 @@
         let resumeCount = 0;
         let questionCount = 0;
         const maxQuestions = 30;
-	    
-function setFocusToTextBox(){
-    document.getElementById("answerInput").focus();
-}
 	
         function startCountdown() {
             let countdown = 5;
@@ -245,6 +241,7 @@ function setFocusToTextBox(){
                     clearInterval(countdownInterval);
                     countdownElement.innerText = ""; 
                     generateQuestion(); 
+		    document.getElementById("answerInput").focus();
                 }
             }, 1000);
         }
