@@ -241,7 +241,6 @@
                     clearInterval(countdownInterval);
                     countdownElement.innerText = ""; 
                     generateQuestion(); 
-		    document.getElementById("answerInput").focus();
                 }
             }, 1000);
         }
@@ -257,6 +256,7 @@
             document.getElementById("answerInput").value = ""; 
             document.getElementById("feedbackMessage").innerText = ""; 
             startTimer();
+            document.getElementById("answerInput").focus();
         }
 
         function startTimer() {
