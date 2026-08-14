@@ -5,388 +5,751 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tables Game</title>
     <style>
-	    .resume-btn {
-            display: none;
-        }
-		
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
-        .container {
-            text-align: center;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            width: 320px;
-            max-width: 90%;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1em;
-            color: #555;
-        }
-        #question {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #444;
-            margin: 15px 0;
-        }
-        input[type="number"] {
-            width: 90%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 1em;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            text-align: center;
-            transition: border-color 0.3s;
-        }
-        input[type="number"]:focus {
-            border-color: #3b82f6;
-            outline: none;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin: 5px;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        .submit-btn {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .submit-btn:hover {
-            background-color: #2563eb;
-        }
-        .pause-btn {
-            background-color: #34d399;
-            color: white;
-        }
-        .pause-btn:hover {
-            background-color: #10b981;
-        }
-        .resume-btn {
-            background-color: #f87171;
-            color: white;
-        }
-        .resume-btn:hover {
-            background-color: #ef4444;
-        }
-        .print-btn {
-            background-color: #ffa726;
-            color: white;
-        }
-        .print-btn:hover {
-            background-color: #fb8c00;
-        }
-        .timer, .score, .feedback, .history, .progress-bar-container {
-            margin-top: 20px;
-            font-size: 1.1em;
-        }
-        .feedback {
-            color: #374151;
-            font-weight: bold;
-            font-size: 1.1em;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .feedback.correct {
-            color: #065f46;
-        }
-        .feedback.incorrect {
-            color: #991b1b;
-        }
-        .history {
-            font-size: 1em;
-        }
-        .history h3 {
-            color: #333;
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-        .history-list {
-            text-align: left;
-            margin-top: 10px;
-            font-size: 0.9em;
-            max-height: 150px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            color: #444;
-        }
-        .history-list p {
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .progress-bar-container {
-            width: 100%;
-            background-color: #ddd;
-            height: 20px;
-            border-radius: 10px;
+            min-height: 100vh;
+            background: #0a0a2e;
             overflow: hidden;
+        }
+
+        /* ── Game Card ── */
+        .game-card {
+            position: relative;
+            width: min(680px, 96vw);
+            aspect-ratio: 16/9;
+            border-radius: 28px;
+            border: 4px solid #1e3a8a;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,0,80,.8), inset 0 0 80px rgba(0,0,60,.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ── Sky Background ── */
+        .sky {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, #1a3a8a 0%, #0d1f5c 40%, #070d2e 100%);
+            z-index: 0;
+        }
+
+        /* Stars */
+        .stars {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: #fff;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: .3; transform: scale(1); }
+            to   { opacity: 1;  transform: scale(1.4); }
+        }
+
+        /* Gold sparkle dots */
+        .sparkle {
+            position: absolute;
+            width: 6px; height: 6px;
+            background: #fbbf24;
+            clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+            opacity: .7;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        /* Clouds */
+        .clouds {
+            position: absolute;
+            bottom: 22%;
+            width: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .cloud {
+            position: absolute;
+            background: #1a4a8a;
+            border-radius: 50px;
+            opacity: .55;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        /* Green Hill */
+        .hill {
+            position: absolute;
+            bottom: 0;
+            width: 140%;
+            left: -20%;
+            height: 26%;
+            background: radial-gradient(ellipse at 50% 100%, #2d7a2d 0%, #1a5c1a 60%, #0f3d0f 100%);
+            border-radius: 60% 60% 0 0;
+            z-index: 3;
+        }
+        /* Lighter strip on hill top */
+        .hill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; width: 80%; height: 40%;
+            background: radial-gradient(ellipse, #3da83d 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Bushes/trees */
+        .bushes {
+            position: absolute;
+            bottom: 20%;
+            width: 100%;
+            z-index: 4;
+            pointer-events: none;
+        }
+        .bush {
+            position: absolute;
+            background: #1a6020;
+            border-radius: 50% 50% 40% 40%;
+        }
+        .bush::before {
+            content: '';
+            position: absolute;
+            background: #22782a;
+            border-radius: 50%;
+        }
+
+        /* ── HUD Bar ── */
+        .hud {
+            position: relative;
+            z-index: 10;
+            width: 92%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3.5%;
+            gap: 10px;
+        }
+        .hud-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(10, 20, 60, 0.75);
+            border: 2px solid rgba(100, 140, 255, 0.4);
+            border-radius: 14px;
+            padding: 6px 14px;
+            backdrop-filter: blur(6px);
+            min-width: 90px;
+        }
+        .hud-icon { font-size: 1.5em; line-height: 1; }
+        .hud-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .hud-title {
+            font-size: .62em;
+            color: #a0b4e8;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+        }
+        .hud-value {
+            font-size: 1.1em;
+            font-weight: 900;
+            color: #fbbf24;
+            line-height: 1.1;
+        }
+        /* Timer value in white */
+        #timerValue { color: #ffffff; }
+
+        /* ── Question Area ── */
+        .question-area {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        #countdown-overlay {
+            font-size: 5em;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 0 4px 20px rgba(251,191,36,.6);
+            display: none;
+        }
+
+        #question {
+            font-size: clamp(2em, 7vw, 4em);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 4px 24px rgba(0,0,0,.5);
+            letter-spacing: .05em;
+        }
+        #question .question-mark {
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251,191,36,.8);
+        }
+
+        /* Quiz Complete message */
+        #quiz-complete {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+        }
+        #quiz-complete h2 {
+            font-size: 2em;
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251,191,36,.7);
+        }
+        #quiz-complete p { color: #e0e8ff; font-size: 1.1em; }
+        #restart-btn {
+            margin-top: 10px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1em;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1e3a8a, 0 8px 20px rgba(0,0,0,.4);
+            transition: transform .1s, box-shadow .1s;
+        }
+        #restart-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #1e3a8a; }
+
+        /* ── Answer Buttons ── */
+        .answers {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(6px, 2vw, 14px);
+            width: 88%;
+            margin-bottom: 5%;
+        }
+        .answer-btn {
+            padding: clamp(10px, 3vw, 18px) 0;
+            font-size: clamp(.95em, 2.8vw, 1.5em);
+            font-weight: 900;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,.3);
+            transition: transform .12s, box-shadow .12s, filter .15s;
+            letter-spacing: .03em;
+        }
+        .answer-btn:hover  { transform: translateY(-3px); filter: brightness(1.12); }
+        .answer-btn:active { transform: translateY(2px); }
+
+        /* Individual button colours */
+        .answer-btn:nth-child(1) {
+            background: linear-gradient(160deg, #4a9fe8 0%, #1e6fc4 100%);
+            box-shadow: 0 6px 0 #1450a0, 0 8px 20px rgba(0,0,0,.35);
+        }
+        .answer-btn:nth-child(1):active { box-shadow: 0 3px 0 #1450a0; }
+
+        .answer-btn:nth-child(2) {
+            background: linear-gradient(160deg, #4ec85a 0%, #27933a 100%);
+            box-shadow: 0 6px 0 #186028, 0 8px 20px rgba(0,0,0,.35);
+        }
+        .answer-btn:nth-child(2):active { box-shadow: 0 3px 0 #186028; }
+
+        .answer-btn:nth-child(3) {
+            background: linear-gradient(160deg, #f9a828 0%, #e07000 100%);
+            box-shadow: 0 6px 0 #a04d00, 0 8px 20px rgba(0,0,0,.35);
+        }
+        .answer-btn:nth-child(3):active { box-shadow: 0 3px 0 #a04d00; }
+
+        .answer-btn:nth-child(4) {
+            background: linear-gradient(160deg, #a86ee8 0%, #7030c0 100%);
+            box-shadow: 0 6px 0 #4e1e90, 0 8px 20px rgba(0,0,0,.35);
+        }
+        .answer-btn:nth-child(4):active { box-shadow: 0 3px 0 #4e1e90; }
+
+        /* Correct / Incorrect flash */
+        .answer-btn.correct-flash {
+            background: linear-gradient(160deg, #86efac, #22c55e) !important;
+            box-shadow: 0 0 24px #22c55e !important;
+        }
+        .answer-btn.wrong-flash {
+            background: linear-gradient(160deg, #fca5a5, #ef4444) !important;
+            box-shadow: 0 0 24px #ef4444 !important;
+        }
+        .answer-btn:disabled { cursor: default; filter: none; transform: none; }
+
+        /* Progress bar at very bottom */
+        .progress-bar-container {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 6px;
+            background: rgba(255,255,255,.1);
+            z-index: 10;
         }
         .progress-bar {
             height: 100%;
             display: flex;
         }
-        .progress-segment {
-            height: 100%;
+        .progress-segment { height: 100%; }
+        .progress-segment.correct   { background: #4ade80; }
+        .progress-segment.incorrect { background: #f87171; }
+
+        /* ── Feedback toast ── */
+        #feedback-toast {
+            position: absolute;
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: rgba(0,0,0,.7);
+            color: #fff;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 800;
+            z-index: 20;
+            transition: transform .2s, opacity .2s;
+            white-space: nowrap;
+            pointer-events: none;
         }
-        .progress-segment.correct {
-            background-color: #34d399;
-        }
-        .progress-segment.incorrect {
-            background-color: #f87171;
-        }
-        .progress-segment.unanswered {
-            background-color: #3b82f6;
-        }
-        /* Hide the history section by default */
-        .history {
+        #feedback-toast.show { transform: translateX(-50%) scale(1); }
+
+        /* ── Pause overlay ── */
+        #pause-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,40,.85);
+            z-index: 30;
             display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
         }
-        /* Print styles to only print the answer history */
+        #pause-overlay h2 { color: #fbbf24; font-size: 2em; }
+        #pause-overlay button {
+            padding: 12px 36px;
+            font-size: 1.1em;
+            font-weight: 800;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #4ade80, #16a34a);
+            color: #fff;
+            box-shadow: 0 5px 0 #14532d;
+            transition: transform .1s;
+        }
+        #pause-overlay button:active { transform: translateY(3px); box-shadow: 0 2px 0 #14532d; }
+
+        /* Pause button floating */
+        #pause-btn {
+            position: absolute;
+            top: 3.5%;
+            right: 3.5%;
+            z-index: 20;
+            background: rgba(10,20,60,.7);
+            border: 2px solid rgba(100,140,255,.35);
+            color: #a0b4e8;
+            border-radius: 10px;
+            padding: 5px 12px;
+            font-size: .8em;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: .05em;
+        }
+        #pause-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
+
+        /* History (hidden, print only) */
+        .history { display: none; }
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .history, .history * {
-                visibility: visible;
-            }
-            .history {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-            }
+            body * { visibility: hidden; }
+            .history, .history * { visibility: visible; }
+            .history { position: absolute; top: 0; left: 0; width: 100%; display: block !important; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Tables Game</h1>
-        <p>Answer the multiplication question below:</p>
-        <p id="countdown"></p>
-        <p id="question"></p>
-        <input type="number" id="answerInput" placeholder="Your answer">
-        <button class="submit-btn" onclick="checkAnswer()">Submit</button>
-        
-        <div class="timer">
-            <p>Timer: <span id="timer">1</span> seconds</p>
-        </div>
 
-        <div class="controls">
-            <button class="pause-btn" onclick="pauseTimer()">Pause</button>
-            <button class="resume-btn" onclick="resumeTimer()">Resume</button>
-        </div>
+<div class="game-card">
+    <!-- Sky layer -->
+    <div class="sky"></div>
+    <div class="stars" id="stars"></div>
 
-        <div class="score">
-            <p>Correct Answers: <span id="correctCount">0</span></p>
-            <p>Incorrect Answers: <span id="incorrectCount">0</span></p>
-        </div>
+    <!-- Hill & bushes -->
+    <div class="hill"></div>
+    <div class="bushes" id="bushes"></div>
+    <div class="clouds" id="clouds"></div>
 
-        <div class="progress-bar-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-        
+    <!-- Pause button -->
+    <button id="pause-btn" onclick="pauseGame()">⏸ Pause</button>
 
-        <button class="print-btn" onclick="printResults()" style="display: none;" id="printButton">Print Results</button>
-		<p>Developed by, Shrevatsa, 10th Grade, Narayana Olympiad School, Pallikarani", Incase of issues, please email "shrevatsas@gmail.com"</p>
-
-        <div class="feedback" id="feedbackMessage"></div>
-        <div class="history" id="historySection">
-            <h3>Answer History</h3>
-            <div class="history-list" id="historyList"></div>
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-badge">
+            <span class="hud-icon">⭐</span>
+            <div class="hud-label">
+                <span class="hud-title">Score</span>
+                <span class="hud-value" id="scoreValue">0</span>
+            </div>
         </div>
-        
+        <div class="hud-badge">
+            <span class="hud-icon">⏰</span>
+            <div class="hud-label">
+                <span class="hud-title">Time</span>
+                <span class="hud-value" id="timerValue">10</span>
+            </div>
+        </div>
+        <div class="hud-badge">
+            <span class="hud-icon">🏆</span>
+            <div class="hud-label">
+                <span class="hud-title">Streak</span>
+                <span class="hud-value" id="streakValue">0</span>
+            </div>
+        </div>
     </div>
 
-    <script>
-        let correctCount = 0;
-        let incorrectCount = 0;
-        let num1, num2;
-        let timerCount = 1;
-        let timerInterval;
-        let isPaused = false;
-        let pauseCount = 0;
-        let resumeCount = 0;
-        let questionCount = 0;
-        const maxQuestions = 30;
-	
-        function startCountdown() {
-            let countdown = 5;
-            const countdownElement = document.getElementById("countdown");
-            countdownElement.innerText = "Starting in... " + countdown;
+    <!-- Question -->
+    <div class="question-area">
+        <div id="countdown-overlay"></div>
+        <div id="question"></div>
+        <div id="quiz-complete">
+            <h2>🎉 Quiz Complete!</h2>
+            <p id="final-score-msg"></p>
+            <button id="restart-btn" onclick="restartQuiz()">Play Again</button>
+        </div>
+    </div>
 
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    countdownElement.innerText = "Starting in... " + countdown;
-                } else {
-                    clearInterval(countdownInterval);
-                    countdownElement.innerText = ""; 
-                    generateQuestion(); 
-                }
-            }, 1000);
+    <!-- Answer Buttons -->
+    <div class="answers" id="answers">
+        <button class="answer-btn" id="btn0" onclick="selectAnswer(0)"></button>
+        <button class="answer-btn" id="btn1" onclick="selectAnswer(1)"></button>
+        <button class="answer-btn" id="btn2" onclick="selectAnswer(2)"></button>
+        <button class="answer-btn" id="btn3" onclick="selectAnswer(3)"></button>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Feedback toast -->
+    <div id="feedback-toast"></div>
+
+    <!-- Pause overlay -->
+    <div id="pause-overlay">
+        <h2>⏸ Paused</h2>
+        <button onclick="resumeGame()">▶ Resume</button>
+    </div>
+</div>
+
+<!-- Hidden history for print -->
+<div class="history" id="historySection">
+    <h3>Answer History</h3>
+    <div id="historyList"></div>
+</div>
+
+<script>
+    /* ── Config ── */
+    const MAX_QUESTIONS = 30;
+    const QUESTION_TIME = 10; // seconds per question
+
+    /* ── State ── */
+    let correctCount = 0, incorrectCount = 0, streak = 0, score = 0;
+    let num1, num2, correctAnswer, choices;
+    let questionCount = 0;
+    let timeLeft = QUESTION_TIME;
+    let timerInterval;
+    let isPaused = false;
+    let gameActive = false;
+
+    /* ── Background generation ── */
+    function buildBackground() {
+        // Stars
+        const starsEl = document.getElementById('stars');
+        starsEl.innerHTML = '';
+        const starCount = 60;
+        for (let i = 0; i < starCount; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const size = Math.random() * 3 + 1;
+            s.style.cssText = `
+                width:${size}px; height:${size}px;
+                top:${Math.random() * 65}%;
+                left:${Math.random() * 100}%;
+                animation-delay:${Math.random() * 3}s;
+                animation-duration:${1.5 + Math.random() * 2}s;
+            `;
+            starsEl.appendChild(s);
         }
-
-        function generateQuestion() {
-            if (questionCount >= maxQuestions) {
-                endQuiz();
-                return;
-            }
-            num1 = Math.floor(Math.random() * 10) + 1;
-            num2 = Math.floor(Math.random() * 10) + 1;
-            document.getElementById("question").innerText = `What is ${num1} x ${num2}?`;
-            document.getElementById("answerInput").value = ""; 
-            document.getElementById("feedbackMessage").innerText = ""; 
-            startTimer();
-            document.getElementById("answerInput").focus();
-        }
-
-        function startTimer() {
-            timerCount = 1;
-            document.getElementById("timer").innerText = timerCount;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!isPaused && timerCount < 7) {
-                    timerCount++;
-                    document.getElementById("timer").innerText = timerCount;
-                } else if (timerCount >= 7) {
-                    clearInterval(timerInterval);
-                    markIncorrect();
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            isPaused = true;
-			document.querySelector('.pause-btn').style.display = 'none';
-            document.querySelector('.resume-btn').style.display = 'inline-block';
-            pauseCount++;
-            addToHistory("Pause", `Paused at question: ${num1} x ${num2}`);
-        }
-
-        function resumeTimer() {
-            isPaused = false;
-			document.querySelector('.pause-btn').style.display = 'inline-block';
-            document.querySelector('.resume-btn').style.display = 'none';
-            resumeCount++;
-            addToHistory("Resume", `Resumed with question: ${num1} x ${num2}`);
-            generateQuestion();
-        }
-
-        function checkAnswer() {
-            clearInterval(timerInterval);
-            const userAnswer = parseInt(document.getElementById("answerInput").value);
-            const correctAnswer = num1 * num2;
-
-            const feedbackMessage = document.getElementById("feedbackMessage");
-            questionCount++;
-
-            if (userAnswer === correctAnswer) {
-                correctCount++;
-                feedbackMessage.innerText = "Correct!";
-                feedbackMessage.classList.add("correct");
-                addToHistory("Correct", `${num1} x ${num2} = ${userAnswer}`);
-                updateProgressBar("correct");
-            } else {
-                incorrectCount++;
-                feedbackMessage.innerText = `Incorrect! The correct answer was ${correctAnswer}.`;
-                feedbackMessage.classList.add("incorrect");
-                addToHistory("Incorrect", `${num1} x ${num2} = ${userAnswer} (Correct: ${correctAnswer})`);
-                updateProgressBar("incorrect");
-            }
-
-            document.getElementById("correctCount").innerText = correctCount;
-            document.getElementById("incorrectCount").innerText = incorrectCount;
-
-            generateQuestion();
-        }
-
-        function markIncorrect() {
-            incorrectCount++;
-            questionCount++;
-            const correctAnswer = num1 * num2;
-            document.getElementById("feedbackMessage").innerText = `Time's up! The correct answer was ${correctAnswer}.`;
-            document.getElementById("incorrectCount").innerText = incorrectCount;
-            addToHistory("Time's up", `${num1} x ${num2} = No answer (Correct: ${correctAnswer})`);
-            updateProgressBar("incorrect");
-
-            generateQuestion();
-        }
-
-        function updateProgressBar(result) {
-            const progressBar = document.getElementById("progressBar");
-            const segment = document.createElement("div");
-            segment.classList.add("progress-segment");
-
-            if (result === "correct") {
-                segment.classList.add("correct");
-            } else if (result === "incorrect") {
-                segment.classList.add("incorrect");
-            } else {
-                segment.classList.add("unanswered");
-            }
-            progressBar.appendChild(segment);
-            segment.style.width = `${100 / maxQuestions}%`;
-        }
-
-        function addToHistory(result, details) {
-            const historySection = document.getElementById("historySection");
-            const historyList = document.getElementById("historyList");
-            const entry = document.createElement("p");
-            const currentDateTime = new Date().toLocaleString();
-            entry.innerText = `[${currentDateTime}] ${result}: ${details}`;
-            historyList.appendChild(entry);
-
-            // Display the history section when an entry is added
-            if (historyList.childElementCount > 0) {
-                historySection.style.display = "block";
-            }
-        }
-
-        function endQuiz() {
-            clearInterval(timerInterval);
-            document.getElementById("feedbackMessage").innerText = "Quiz Complete!";
-            document.getElementById("printButton").style.display = "block";
-            document.getElementById("question").innerText = "Quiz Complete!";
-            document.getElementById("answerInput").disabled = true;
-        }
-
-        function printResults() {
-            window.print();
-        }
-
-        function printHistory() {
-            const printButton = document.querySelector(".print-btn");
-            printButton.style.display = "none";  // Hide print button before printing history
-            window.print();
-            printButton.style.display = "block";  // Show print button after printing history
-        }
-
-        document.getElementById("answerInput").addEventListener("keyup", function(event) {
-            if (event.key === "Enter") {
-                checkAnswer();
-            }
+        // Gold sparkles
+        const sparklePositions = [
+            [15,30],[82,12],[45,55],[68,28],[30,18],[90,42],[10,60]
+        ];
+        sparklePositions.forEach(([x,y]) => {
+            const sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.style.cssText = `left:${x}%;top:${y}%;animation-delay:${Math.random()*2}s;`;
+            starsEl.appendChild(sp);
         });
 
-        window.onload = startCountdown;
-    </script>
+        // Clouds
+        const cloudsEl = document.getElementById('clouds');
+        cloudsEl.innerHTML = '';
+        const cloudData = [
+            { left: 2,  w: 80,  h: 22 },
+            { left: 15, w: 120, h: 30 },
+            { left: 70, w: 90,  h: 24 },
+            { left: 82, w: 60,  h: 18 },
+        ];
+        cloudData.forEach(c => {
+            const cl = document.createElement('div');
+            cl.className = 'cloud';
+            cl.style.cssText = `left:${c.left}%;width:${c.w}px;height:${c.h}px;`;
+            cl.style.setProperty('--bw', c.w * .6 + 'px');
+            cl.style.setProperty('--bh', c.h * .8 + 'px');
+            cloudsEl.appendChild(cl);
+        });
+
+        // Bushes
+        const bushesEl = document.getElementById('bushes');
+        bushesEl.innerHTML = '';
+        const bushData = [
+            { left: 2,  w: 40, h: 30 },
+            { left: 6,  w: 55, h: 38 },
+            { left: 14, w: 35, h: 26 },
+            { left: 80, w: 45, h: 32 },
+            { left: 87, w: 60, h: 40 },
+            { left: 93, w: 38, h: 28 },
+        ];
+        bushData.forEach(b => {
+            const bu = document.createElement('div');
+            bu.className = 'bush';
+            bu.style.cssText = `left:${b.left}%;width:${b.w}px;height:${b.h}px;`;
+            bushesEl.appendChild(bu);
+        });
+    }
+
+    /* ── Quiz logic ── */
+    function startCountdown() {
+        gameActive = false;
+        let c = 3;
+        const overlay = document.getElementById('countdown-overlay');
+        const questionEl = document.getElementById('question');
+        const answersEl = document.getElementById('answers');
+        overlay.style.display = 'block';
+        questionEl.style.display = 'none';
+        answersEl.style.visibility = 'hidden';
+        overlay.innerText = c;
+
+        const iv = setInterval(() => {
+            c--;
+            if (c > 0) {
+                overlay.innerText = c;
+            } else {
+                clearInterval(iv);
+                overlay.style.display = 'none';
+                questionEl.style.display = 'block';
+                answersEl.style.visibility = 'visible';
+                generateQuestion();
+            }
+        }, 1000);
+    }
+
+    function generateQuestion() {
+        if (questionCount >= MAX_QUESTIONS) { endQuiz(); return; }
+
+        num1 = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        correctAnswer = num1 * num2;
+
+        // Build 4 unique choices including the correct one
+        choices = generateChoices(correctAnswer);
+
+        document.getElementById('question').innerHTML =
+            `${num1} &times; ${num2} = <span class="question-mark">?</span>`;
+
+        const btns = document.querySelectorAll('.answer-btn');
+        btns.forEach((btn, i) => {
+            btn.textContent = choices[i];
+            btn.disabled = false;
+            btn.classList.remove('correct-flash', 'wrong-flash');
+        });
+
+        resetTimer();
+        gameActive = true;
+    }
+
+    function generateChoices(correct) {
+        const set = new Set([correct]);
+        while (set.size < 4) {
+            const delta = (Math.floor(Math.random() * 5) + 1) * (Math.random() < .5 ? 1 : -1);
+            const candidate = correct + delta;
+            if (candidate > 0) set.add(candidate);
+        }
+        // Shuffle
+        return [...set].sort(() => Math.random() - .5);
+    }
+
+    function selectAnswer(index) {
+        if (!gameActive || isPaused) return;
+        gameActive = false;
+        clearInterval(timerInterval);
+
+        const chosen = choices[index];
+        const btns = document.querySelectorAll('.answer-btn');
+
+        if (chosen === correctAnswer) {
+            btns[index].classList.add('correct-flash');
+            correctCount++;
+            streak++;
+            const points = 10 + (streak > 1 ? (streak - 1) * 5 : 0);
+            score += points;
+            showToast(`✅ Correct! +${points}`, '#22c55e');
+            addToHistory('Correct', `${num1} × ${num2} = ${chosen}`);
+        } else {
+            btns[index].classList.add('wrong-flash');
+            // Highlight correct answer
+            const correctIdx = choices.indexOf(correctAnswer);
+            btns[correctIdx].classList.add('correct-flash');
+            incorrectCount++;
+            streak = 0;
+            showToast(`❌ It was ${correctAnswer}`, '#ef4444');
+            addToHistory('Incorrect', `${num1} × ${num2} = ${chosen} (Correct: ${correctAnswer})`);
+        }
+
+        updateHUD();
+        updateProgressBar(chosen === correctAnswer ? 'correct' : 'incorrect');
+        questionCount++;
+
+        // Disable all buttons briefly
+        btns.forEach(b => b.disabled = true);
+
+        setTimeout(() => generateQuestion(), 900);
+    }
+
+    /* ── Timer ── */
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timeLeft = QUESTION_TIME;
+        document.getElementById('timerValue').innerText = timeLeft;
+
+        timerInterval = setInterval(() => {
+            if (isPaused) return;
+            timeLeft--;
+            document.getElementById('timerValue').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeUp();
+            }
+        }, 1000);
+    }
+
+    function timeUp() {
+        if (!gameActive) return;
+        gameActive = false;
+        incorrectCount++;
+        streak = 0;
+        const btns = document.querySelectorAll('.answer-btn');
+        const correctIdx = choices.indexOf(correctAnswer);
+        btns[correctIdx].classList.add('correct-flash');
+        btns.forEach(b => b.disabled = true);
+        showToast(`⏰ Time's up! Answer: ${correctAnswer}`, '#f97316');
+        addToHistory("Time's up", `${num1} × ${num2} = — (Correct: ${correctAnswer})`);
+        updateHUD();
+        updateProgressBar('incorrect');
+        questionCount++;
+        setTimeout(() => generateQuestion(), 900);
+    }
+
+    /* ── HUD ── */
+    function updateHUD() {
+        document.getElementById('scoreValue').innerText = score;
+        document.getElementById('streakValue').innerText = streak;
+    }
+
+    /* ── Progress bar ── */
+    function updateProgressBar(result) {
+        const bar = document.getElementById('progressBar');
+        const seg = document.createElement('div');
+        seg.className = `progress-segment ${result}`;
+        seg.style.width = `${100 / MAX_QUESTIONS}%`;
+        bar.appendChild(seg);
+    }
+
+    /* ── Toast ── */
+    let toastTimeout;
+    function showToast(msg, color) {
+        const t = document.getElementById('feedback-toast');
+        t.style.background = color + 'cc';
+        t.innerText = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 800);
+    }
+
+    /* ── Pause / Resume ── */
+    function pauseGame() {
+        if (!gameActive && timeLeft === QUESTION_TIME) return;
+        isPaused = true;
+        document.getElementById('pause-overlay').style.display = 'flex';
+        addToHistory('Pause', `Paused at question ${questionCount + 1}: ${num1} × ${num2}`);
+    }
+    function resumeGame() {
+        isPaused = false;
+        document.getElementById('pause-overlay').style.display = 'none';
+        addToHistory('Resume', `Resumed at question ${questionCount + 1}: ${num1} × ${num2}`);
+    }
+
+    /* ── End Quiz ── */
+    function endQuiz() {
+        clearInterval(timerInterval);
+        document.getElementById('question').style.display = 'none';
+        document.getElementById('answers').style.visibility = 'hidden';
+        document.getElementById('pause-btn').style.display = 'none';
+        const qc = document.getElementById('quiz-complete');
+        qc.style.display = 'flex';
+        document.getElementById('final-score-msg').innerText =
+            `Score: ${score}  |  ✅ ${correctCount}  ❌ ${incorrectCount}`;
+    }
+
+    function restartQuiz() {
+        correctCount = 0; incorrectCount = 0; streak = 0; score = 0;
+        questionCount = 0; isPaused = false; gameActive = false;
+        document.getElementById('progressBar').innerHTML = '';
+        document.getElementById('quiz-complete').style.display = 'none';
+        document.getElementById('question').style.display = 'block';
+        document.getElementById('answers').style.visibility = 'visible';
+        document.getElementById('pause-btn').style.display = 'block';
+        updateHUD();
+        startCountdown();
+    }
+
+    /* ── History (for print) ── */
+    function addToHistory(result, details) {
+        const list = document.getElementById('historyList');
+        const p = document.createElement('p');
+        p.innerText = `[${new Date().toLocaleString()}] ${result}: ${details}`;
+        list.appendChild(p);
+    }
+
+    /* ── Init ── */
+    buildBackground();
+    startCountdown();
+</script>
 </body>
 </html>
