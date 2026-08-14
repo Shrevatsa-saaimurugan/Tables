@@ -2,10 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="full-screen" content="yes">
     <title>Tables Game</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Force landscape on portrait devices ── */
+        @media screen and (orientation: portrait) {
+            html {
+                transform: rotate(90deg);
+                transform-origin: left top;
+                width: 100vh;
+                height: 100vw;
+                overflow: hidden;
+                position: absolute;
+                top: 100%;
+                left: 0;
+            }
+        }
 
         body {
             font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
@@ -746,6 +763,24 @@
         p.innerText = `[${new Date().toLocaleString()}] ${result}: ${details}`;
         list.appendChild(p);
     }
+
+    /* ── Force landscape orientation ── */
+    function lockLandscape() {
+        const screen = window.screen;
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {/* not supported, CSS fallback handles it */});
+        } else if (screen.lockOrientation) {
+            screen.lockOrientation('landscape');
+        } else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation('landscape');
+        } else if (screen.msLockOrientation) {
+            screen.msLockOrientation('landscape');
+        }
+    }
+    lockLandscape();
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) lockLandscape();
+    });
 
     /* ── Init ── */
     buildBackground();
