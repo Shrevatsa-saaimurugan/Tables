@@ -282,33 +282,33 @@
             letter-spacing: .03em;
             touch-action: manipulation;
         }
-        .answer-btn:hover  { transform: translateY(-3px); filter: brightness(1.12); }
-        .answer-btn:active { transform: translateY(2px); }
+        .answer-btn:hover  { filter: brightness(1.12); }
+        .answer-btn.pressing { transform: translateY(3px) !important; }
+        .answer-btn.pressing:nth-child(1) { box-shadow: 0 3px 0 #1450a0 !important; }
+        .answer-btn.pressing:nth-child(2) { box-shadow: 0 3px 0 #186028 !important; }
+        .answer-btn.pressing:nth-child(3) { box-shadow: 0 3px 0 #a04d00 !important; }
+        .answer-btn.pressing:nth-child(4) { box-shadow: 0 3px 0 #4e1e90 !important; }
 
         /* Individual button colours */
         .answer-btn:nth-child(1) {
             background: linear-gradient(160deg, #4a9fe8 0%, #1e6fc4 100%);
             box-shadow: 0 6px 0 #1450a0, 0 8px 20px rgba(0,0,0,.35);
         }
-        .answer-btn:nth-child(1):active { box-shadow: 0 3px 0 #1450a0; }
 
         .answer-btn:nth-child(2) {
             background: linear-gradient(160deg, #4ec85a 0%, #27933a 100%);
             box-shadow: 0 6px 0 #186028, 0 8px 20px rgba(0,0,0,.35);
         }
-        .answer-btn:nth-child(2):active { box-shadow: 0 3px 0 #186028; }
 
         .answer-btn:nth-child(3) {
             background: linear-gradient(160deg, #f9a828 0%, #e07000 100%);
             box-shadow: 0 6px 0 #a04d00, 0 8px 20px rgba(0,0,0,.35);
         }
-        .answer-btn:nth-child(3):active { box-shadow: 0 3px 0 #a04d00; }
 
         .answer-btn:nth-child(4) {
             background: linear-gradient(160deg, #a86ee8 0%, #7030c0 100%);
             box-shadow: 0 6px 0 #4e1e90, 0 8px 20px rgba(0,0,0,.35);
         }
-        .answer-btn:nth-child(4):active { box-shadow: 0 3px 0 #4e1e90; }
 
         /* Correct / Incorrect flash */
         .answer-btn.correct-flash {
@@ -319,7 +319,7 @@
             background: linear-gradient(160deg, #fca5a5, #ef4444) !important;
             box-shadow: 0 0 24px #ef4444 !important;
         }
-        .answer-btn:disabled { cursor: default; filter: none; transform: none; }
+        .answer-btn:disabled { cursor: default; filter: none; transform: translateY(0) !important; }
 
         /* Progress bar at very bottom */
         .progress-bar-container {
@@ -401,6 +401,105 @@
         }
         #pause-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
 
+        /* ── Start Screen overlay ── */
+        #start-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(10px, 2.5vh, 22px);
+            background: rgba(4, 10, 40, 0.78);
+            backdrop-filter: blur(4px);
+        }
+        #start-screen .game-title {
+            font-size: clamp(1.6em, 6vw, 3.2em);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 4px 24px rgba(0,0,0,.6);
+            letter-spacing: .04em;
+            text-align: center;
+        }
+        #start-screen .game-title span {
+            color: #fbbf24;
+            text-shadow: 0 0 24px rgba(251,191,36,.8);
+        }
+        #start-screen .subtitle {
+            font-size: clamp(.75em, 2vw, 1.1em);
+            color: #a0b4e8;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        #start-screen .info-pills {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #start-screen .pill {
+            background: rgba(30, 58, 138, 0.7);
+            border: 1.5px solid rgba(100,140,255,.35);
+            border-radius: 30px;
+            padding: 5px 16px;
+            font-size: clamp(.7em, 1.8vw, .9em);
+            color: #c7d9ff;
+            font-weight: 700;
+        }
+        #start-btn {
+            margin-top: 4px;
+            padding: clamp(10px,2vh,16px) clamp(32px,8vw,64px);
+            font-size: clamp(1em, 3vw, 1.6em);
+            font-weight: 900;
+            color: #fff;
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #92400e, 0 12px 30px rgba(0,0,0,.45);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            transition: transform .12s, box-shadow .12s;
+            touch-action: manipulation;
+        }
+        #start-btn:hover  { transform: translateY(-3px); filter: brightness(1.1); }
+        #start-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #92400e; }
+
+        /* ── Level picker ── */
+        .level-picker {
+            display: flex;
+            gap: clamp(8px, 2vw, 18px);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .level-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: clamp(8px,1.8vh,14px) clamp(14px,3vw,28px);
+            border: 3px solid transparent;
+            border-radius: 18px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 800;
+            transition: transform .12s, border-color .15s, box-shadow .15s;
+            touch-action: manipulation;
+            min-width: clamp(80px, 15vw, 120px);
+        }
+        .level-btn .lv-icon  { font-size: clamp(1.2em, 3.5vw, 2em); }
+        .level-btn .lv-name  { font-size: clamp(.8em, 2.2vw, 1.1em); color: #fff; letter-spacing: .04em; }
+        .level-btn .lv-desc  { font-size: clamp(.55em, 1.4vw, .72em); color: rgba(255,255,255,.7); text-align: center; }
+
+        .level-btn.easy   { background: linear-gradient(145deg, #166534, #15803d); box-shadow: 0 6px 0 #14532d; }
+        .level-btn.medium { background: linear-gradient(145deg, #92400e, #b45309); box-shadow: 0 6px 0 #78350f; }
+        .level-btn.hard   { background: linear-gradient(145deg, #7f1d1d, #b91c1c); box-shadow: 0 6px 0 #6b1111; }
+
+        .level-btn.selected { border-color: #fbbf24; box-shadow: 0 0 0 3px #fbbf2466, 0 6px 0 currentColor; transform: translateY(-3px); }
+        .level-btn:active   { transform: translateY(3px) !important; }
+
         /* History (hidden, print only) */
         .history { display: none; }
         @media print {
@@ -422,6 +521,34 @@
     <div class="hill"></div>
     <div class="bushes" id="bushes"></div>
     <div class="clouds" id="clouds"></div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="game-title">⭐ Math <span>Tables</span> Quiz ⭐</div>
+        <div class="subtitle">Choose your level</div>
+        <div class="level-picker">
+            <button class="level-btn easy selected" onclick="selectLevel('easy', this)">
+                <span class="lv-icon">🌱</span>
+                <span class="lv-name">Easy</span>
+                <span class="lv-desc">2–10 · 10 sec</span>
+            </button>
+            <button class="level-btn medium" onclick="selectLevel('medium', this)">
+                <span class="lv-icon">🔥</span>
+                <span class="lv-name">Medium</span>
+                <span class="lv-desc">2–12 · 7 sec</span>
+            </button>
+            <button class="level-btn hard" onclick="selectLevel('hard', this)">
+                <span class="lv-icon">💀</span>
+                <span class="lv-name">Hard</span>
+                <span class="lv-desc">6–12 · 5 sec</span>
+            </button>
+        </div>
+        <div class="info-pills" id="level-pills">
+            <span class="pill" id="pill-q">30 Questions</span>
+            <span class="pill">🔥 Streak Bonus</span>
+        </div>
+        <button id="start-btn" onclick="startGame()">▶ Start</button>
+    </div>
 
     <!-- Pause button -->
     <button id="pause-btn" onclick="pauseGame()">⏸ Pause</button>
@@ -493,9 +620,18 @@
 </div>
 
 <script>
+    /* ── Level definitions ── */
+    const LEVELS = {
+        easy:   { time: 10, min: 2, max: 10 },
+        medium: { time: 7,  min: 2, max: 12 },
+        hard:   { time: 5,  min: 6, max: 12 }
+    };
+    let currentLevel = 'easy';
+
     /* ── Config ── */
     const MAX_QUESTIONS = 30;
-    const QUESTION_TIME = 10; // seconds per question
+    let QUESTION_TIME = 10;   // updated when level chosen
+    let NUM_MIN = 2, NUM_MAX = 10;
 
     /* ── State ── */
     let correctCount = 0, incorrectCount = 0, streak = 0, score = 0;
@@ -505,6 +641,13 @@
     let timerInterval;
     let isPaused = false;
     let gameActive = false;
+
+    /* ── Level selector ── */
+    function selectLevel(level, btn) {
+        currentLevel = level;
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    }
 
     /* ── Background generation ── */
     function buildBackground() {
@@ -573,6 +716,17 @@
         });
     }
 
+    /* ── Start game (called by Start button) ── */
+    function startGame() {
+        const cfg = LEVELS[currentLevel];
+        QUESTION_TIME = cfg.time;
+        NUM_MIN = cfg.min;
+        NUM_MAX = cfg.max;
+        document.getElementById('timerValue').innerText = QUESTION_TIME;
+        document.getElementById('start-screen').style.display = 'none';
+        startCountdown();
+    }
+
     /* ── Quiz logic ── */
     function startCountdown() {
         gameActive = false;
@@ -602,8 +756,8 @@
     function generateQuestion() {
         if (questionCount >= MAX_QUESTIONS) { endQuiz(); return; }
 
-        num1 = Math.floor(Math.random() * 10) + 1;
-        num2 = Math.floor(Math.random() * 10) + 1;
+        num1 = Math.floor(Math.random() * (NUM_MAX - NUM_MIN + 1)) + NUM_MIN;
+        num2 = Math.floor(Math.random() * (NUM_MAX - NUM_MIN + 1)) + NUM_MIN;
         correctAnswer = num1 * num2;
 
         // Build 4 unique choices including the correct one
@@ -616,7 +770,10 @@
         btns.forEach((btn, i) => {
             btn.textContent = choices[i];
             btn.disabled = false;
-            btn.classList.remove('correct-flash', 'wrong-flash');
+            btn.classList.remove('correct-flash', 'wrong-flash', 'pressing');
+            // Explicitly reset any lingering inline transform/shadow from prior press
+            btn.style.transform = '';
+            btn.style.boxShadow = '';
         });
 
         resetTimer();
@@ -665,8 +822,8 @@
         updateProgressBar(chosen === correctAnswer ? 'correct' : 'incorrect');
         questionCount++;
 
-        // Disable all buttons briefly
-        btns.forEach(b => b.disabled = true);
+        // Disable all buttons and clear any press state
+        btns.forEach(b => { b.disabled = true; b.classList.remove('pressing'); });
 
         setTimeout(() => generateQuestion(), 900);
     }
@@ -696,7 +853,7 @@
         const btns = document.querySelectorAll('.answer-btn');
         const correctIdx = choices.indexOf(correctAnswer);
         btns[correctIdx].classList.add('correct-flash');
-        btns.forEach(b => b.disabled = true);
+        btns.forEach(b => { b.disabled = true; b.classList.remove('pressing'); });
         showToast(`⏰ Time's up! Answer: ${correctAnswer}`, '#f97316');
         addToHistory("Time's up", `${num1} × ${num2} = — (Correct: ${correctAnswer})`);
         updateHUD();
@@ -765,7 +922,13 @@
         document.getElementById('answers').style.visibility = 'visible';
         document.getElementById('pause-btn').style.display = 'block';
         updateHUD();
-        startCountdown();
+        // Reset level to easy
+        currentLevel = 'easy';
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelector('.level-btn.easy').classList.add('selected');
+        document.getElementById('pill-t').textContent = '⏰ 10 sec each';
+        // Show start screen again
+        document.getElementById('start-screen').style.display = 'flex';
     }
 
     /* ── History (for print) ── */
@@ -810,7 +973,18 @@
 
     /* ── Init ── */
     buildBackground();
-    startCountdown();
+
+    // Replace CSS :active with JS-driven .pressing to avoid stuck state on mobile
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+        const addPress   = () => { if (!btn.disabled) btn.classList.add('pressing'); };
+        const removePress = () => btn.classList.remove('pressing');
+        btn.addEventListener('pointerdown',   addPress);
+        btn.addEventListener('pointerup',     removePress);
+        btn.addEventListener('pointercancel', removePress);
+        btn.addEventListener('pointerleave',  removePress);
+    });
+
+    // Don't auto-start — wait for Start button
 </script>
 </body>
 </html>
