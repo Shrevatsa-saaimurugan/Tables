@@ -500,6 +500,25 @@
         .level-btn.selected { border-color: #fbbf24; box-shadow: 0 0 0 3px #fbbf2466, 0 6px 0 currentColor; transform: translateY(-3px); }
         .level-btn:active   { transform: translateY(3px) !important; }
 
+        /* ── Mute button ── */
+        #mute-btn {
+            position: absolute;
+            top: 3.5%;
+            left: 3.5%;
+            z-index: 20;
+            background: rgba(10,20,60,.7);
+            border: 2px solid rgba(100,140,255,.35);
+            color: #a0b4e8;
+            border-radius: 10px;
+            padding: 5px 12px;
+            font-size: .8em;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: .05em;
+            user-select: none;
+        }
+        #mute-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
+
         /* History (hidden, print only) */
         .history { display: none; }
         @media print {
@@ -552,6 +571,9 @@
 
     <!-- Pause button -->
     <button id="pause-btn" onclick="pauseGame()">⏸ Pause</button>
+
+    <!-- Mute button -->
+    <button id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
 
     <!-- HUD -->
     <div class="hud">
@@ -620,6 +642,324 @@
 </div>
 
 <script>
+    /* ══════════════════════════════════════════════
+       AUDIO ENGINE  (Web Audio API — no external files)
+       ══════════════════════════════════════════════ */
+    let audioCtx = null;
+    let isMuted = false;
+
+    /* Lazily create AudioContext on first user gesture */
+    function getAudioCtx() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    /* ── Master gain (mute control) ── */
+    let masterGain = null;
+    function getMasterGain() {
+        const ctx = getAudioCtx();
+        if (!masterGain) {
+            masterGain = ctx.createGain();
+            masterGain.gain.value = isMuted ? 0 : 1;
+            masterGain.connect(ctx.destination);
+        }
+        return masterGain;
+    }
+
+    /* ── Toggle mute ── */
+    function toggleMute() {
+        isMuted = !isMuted;
+        document.getElementById('mute-btn').textContent = isMuted ? '🔇' : '🔊';
+        if (masterGain) masterGain.gain.value = isMuted ? 0 : 1;
+        if (!isMuted && bgMusicNode === null) startBgMusic();
+    }
+
+    /* ─────────────────────────────────────────────
+       BACKGROUND MUSIC  — upbeat chiptune-style
+       4 layers:
+         1) Square-wave melody  (catchy 16-note phrase, 2 bars × 2)
+         2) Saw-wave bass line  (root notes, pumping 8th notes)
+         3) Triangle arpeggio   (chord tones, 16th-note bursts)
+         4) Rhythm noise hi-hat (16th-note tick)
+       All scheduled ahead via the AudioContext clock for
+       rock-solid timing. BPM = 148.
+    ───────────────────────────────────────────── */
+    let bgMusicNode    = null;
+    let bgGain         = null;
+    let bgScheduleTimer = null;
+    let bgNextBeat     = 0;
+    let bgBeatIdx      = 0;
+
+    const BPM       = 148;
+    const BEAT      = 60 / BPM;          // one quarter note  ≈ 0.405 s
+    const S16       = BEAT / 4;          // one sixteenth note ≈ 0.101 s
+
+    // ── Key: C major pentatonic (C D E G A) ──
+    // Note frequencies for two octaves
+    const N = {
+        C4:261.63, D4:293.66, E4:329.63, G4:392.00, A4:440.00,
+        C5:523.25, D5:587.33, E5:659.25, G5:783.99, A5:880.00,
+        C3:130.81, G3:196.00, A3:220.00, E3:164.81, D3:146.83,
+    };
+
+    // 32-step (2-bar) melody — indexes into MELODY_SEQ
+    // Each entry: [freq, durationIn16ths]  (total = 32 sixteenths)
+    const MELODY_SEQ = [
+        [N.E5,2],[N.G5,2],[N.A5,2],[N.G5,2],
+        [N.E5,2],[N.C5,2],[N.D5,2],[N.E5,2],
+        [N.G5,2],[N.E5,2],[N.D5,2],[N.C5,2],
+        [N.D5,4],[N.E5,2],[N.G5,2],
+        // bar 2
+        [N.A5,2],[N.G5,2],[N.E5,2],[N.D5,2],
+        [N.C5,2],[N.E5,2],[N.G5,2],[N.A5,2],
+        [N.G5,2],[N.E5,2],[N.C5,2],[N.D5,2],
+        [N.C5,4],[0,4],
+    ];
+
+    // Bass: 16-step (1 bar) root pattern, repeating
+    // 0 = rest
+    const BASS_SEQ = [
+        N.C3, 0,    N.C3, N.C3,
+        N.G3, 0,    N.G3, 0,
+        N.A3, 0,    N.A3, N.A3,
+        N.E3, 0,    N.G3, 0,
+    ];
+
+    // Arpeggio chord tones per 4-beat bar (cycles every 4 bars = BASS repeats × 2)
+    const ARP_BARS = [
+        [N.C4, N.E4, N.G4, N.C5],   // C major
+        [N.G3, N.D4, N.G4, N.A4],   // G add9
+        [N.A3, N.C4, N.E4, N.A4],   // A minor
+        [N.E3, N.G3, N.D4, N.E4],   // Em7
+    ];
+
+    // Hi-hat pattern: 1=tick, 0=rest (16 steps, accent every 4)
+    const HAT_SEQ = [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0];
+
+    // Scheduler state
+    let melodyStep = 0, melodyTick = 0;
+    let bassStep   = 0;
+    let arpBar     = 0, arpStep = 0;
+    let hatStep    = 0;
+
+    function startBgMusic() {
+        if (isMuted) return;
+        const ctx = getAudioCtx();
+
+        bgGain = ctx.createGain();
+        bgGain.gain.value = 0.0;
+        bgGain.connect(getMasterGain());
+
+        // Gentle fade-in so the music doesn't slam in
+        bgGain.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 1.2);
+
+        bgNextBeat  = ctx.currentTime + 0.05;
+        bgBeatIdx   = 0;
+        melodyStep  = 0; melodyTick = 0;
+        bassStep    = 0;
+        arpBar      = 0; arpStep = 0;
+        hatStep     = 0;
+
+        scheduleBgChunk();
+    }
+
+    function scheduleBgChunk() {
+        const ctx    = getAudioCtx();
+        const lookahead = 0.25;   // seconds to schedule ahead
+
+        while (bgNextBeat < ctx.currentTime + lookahead) {
+            const t = bgNextBeat;
+
+            // ── 1. Melody (square wave, one 16th note tick) ──
+            if (melodyTick === 0) {
+                const [freq, dur] = MELODY_SEQ[melodyStep % MELODY_SEQ.length];
+                if (freq > 0) bgPlayNote('square', freq, t, S16 * dur * 0.85, 0.18, bgGain);
+                melodyTick = dur;
+                melodyStep = (melodyStep + 1) % MELODY_SEQ.length;
+            }
+            melodyTick--;
+
+            // ── 2. Bass (sawtooth, one 16th note tick) ──
+            const bassFreq = BASS_SEQ[bassStep % BASS_SEQ.length];
+            if (bassFreq > 0) bgPlayNote('sawtooth', bassFreq, t, S16 * 0.7, 0.22, bgGain, true);
+            bassStep = (bassStep + 1) % BASS_SEQ.length;
+
+            // ── 3. Arpeggio (triangle, 16th notes) ──
+            const arpChord = ARP_BARS[arpBar % ARP_BARS.length];
+            const arpFreq  = arpChord[arpStep % arpChord.length];
+            bgPlayNote('triangle', arpFreq, t, S16 * 0.6, 0.10, bgGain);
+            arpStep++;
+            if (arpStep % 16 === 0) arpBar++;   // new bar every 16 ticks
+
+            // ── 4. Hi-hat (filtered noise) ──
+            if (HAT_SEQ[hatStep % HAT_SEQ.length]) {
+                const accent = (hatStep % 4 === 0) ? 0.14 : 0.07;
+                bgPlayHat(t, accent);
+            }
+            hatStep = (hatStep + 1) % HAT_SEQ.length;
+
+            bgNextBeat += S16;
+        }
+
+        bgScheduleTimer = setTimeout(scheduleBgChunk, 100);
+        bgMusicNode = bgScheduleTimer;
+    }
+
+    /* Generic pitched note helper */
+    function bgPlayNote(type, freq, when, dur, vol, outGain, lowpass = false) {
+        const ctx  = getAudioCtx();
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, when);
+        gain.gain.linearRampToValueAtTime(vol, when + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + dur);
+        if (lowpass) {
+            const f = ctx.createBiquadFilter();
+            f.type = 'lowpass'; f.frequency.value = 400;
+            osc.connect(f); f.connect(gain);
+        } else {
+            osc.connect(gain);
+        }
+        gain.connect(outGain);
+        osc.start(when);
+        osc.stop(when + dur + 0.01);
+    }
+
+    /* Noise hi-hat */
+    function bgPlayHat(when, vol) {
+        const ctx     = getAudioCtx();
+        const bufSize = Math.ceil(ctx.sampleRate * 0.04);
+        const buf     = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data    = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const src    = ctx.createBufferSource();
+        src.buffer   = buf;
+        const filt   = ctx.createBiquadFilter();
+        filt.type    = 'highpass';
+        filt.frequency.value = 7000;
+        const gain   = ctx.createGain();
+        gain.gain.setValueAtTime(vol, when);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + 0.035);
+        src.connect(filt); filt.connect(gain); gain.connect(bgGain);
+        src.start(when);
+        src.stop(when + 0.04);
+    }
+
+    function stopBgMusic() {
+        clearTimeout(bgScheduleTimer);
+        bgScheduleTimer = null;
+        bgMusicNode = null;
+        if (bgGain) {
+            try { bgGain.gain.linearRampToValueAtTime(0, getAudioCtx().currentTime + 0.2); } catch(e){}
+            bgGain = null;
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       CORRECT ANSWER — bright ascending fanfare
+    ───────────────────────────────────────────── */
+    function playCorrectSound() {
+        if (isMuted) return;
+        const ctx  = getAudioCtx();
+        const mg   = getMasterGain();
+        const notes = [523.25, 659.25, 783.99, 1046.50];   // C5 E5 G5 C6
+        const times = [0, 0.10, 0.20, 0.32];
+        notes.forEach((freq, i) => {
+            const osc   = ctx.createOscillator();
+            const gain  = ctx.createGain();
+            const when  = ctx.currentTime + times[i];
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, when);
+            gain.gain.linearRampToValueAtTime(0.45, when + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, when + 0.35);
+            osc.connect(gain);
+            gain.connect(mg);
+            osc.start(when);
+            osc.stop(when + 0.4);
+        });
+        // Sparkle shimmer on top
+        const shimmer = ctx.createOscillator();
+        const sg = ctx.createGain();
+        shimmer.type = 'sine';
+        shimmer.frequency.setValueAtTime(2093, ctx.currentTime + 0.32);
+        sg.gain.setValueAtTime(0, ctx.currentTime + 0.32);
+        sg.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.35);
+        sg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.70);
+        shimmer.connect(sg); sg.connect(mg);
+        shimmer.start(ctx.currentTime + 0.32);
+        shimmer.stop(ctx.currentTime + 0.75);
+    }
+
+    /* ─────────────────────────────────────────────
+       WRONG ANSWER — descending dull thud
+    ───────────────────────────────────────────── */
+    function playWrongSound() {
+        if (isMuted) return;
+        const ctx = getAudioCtx();
+        const mg  = getMasterGain();
+
+        // Low descending tones
+        const notes = [220, 174.61, 146.83];   // A3 F3 D3
+        const times = [0, 0.15, 0.30];
+        notes.forEach((freq, i) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const when = ctx.currentTime + times[i];
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, when);
+            osc.frequency.linearRampToValueAtTime(freq * 0.85, when + 0.28);
+            gain.gain.setValueAtTime(0, when);
+            gain.gain.linearRampToValueAtTime(0.30, when + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, when + 0.35);
+            osc.connect(gain); gain.connect(mg);
+            osc.start(when); osc.stop(when + 0.4);
+        });
+
+        // Low rumble noise via filtered white noise
+        const bufSize = ctx.sampleRate * 0.4;
+        const buffer  = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data    = buffer.getChannelData(0);
+        for (let k = 0; k < bufSize; k++) data[k] = Math.random() * 2 - 1;
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 180;
+        const ng = ctx.createGain();
+        ng.gain.setValueAtTime(0.18, ctx.currentTime);
+        ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        source.connect(filter); filter.connect(ng); ng.connect(mg);
+        source.start(ctx.currentTime);
+        source.stop(ctx.currentTime + 0.4);
+    }
+
+    /* ─────────────────────────────────────────────
+       TIME-UP buzzer (same as wrong but sharper)
+    ───────────────────────────────────────────── */
+    function playTimeUpSound() {
+        if (isMuted) return;
+        const ctx = getAudioCtx();
+        const mg  = getMasterGain();
+        [0, 0.18].forEach(delay => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const when = ctx.currentTime + delay;
+            osc.type = 'square';
+            osc.frequency.value = 180;
+            gain.gain.setValueAtTime(0, when);
+            gain.gain.linearRampToValueAtTime(0.25, when + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, when + 0.16);
+            osc.connect(gain); gain.connect(mg);
+            osc.start(when); osc.stop(when + 0.18);
+        });
+    }
+
     /* ── Level definitions ── */
     const LEVELS = {
         easy:   { time: 10, min: 2, max: 10 },
@@ -724,6 +1064,7 @@
         NUM_MAX = cfg.max;
         document.getElementById('timerValue').innerText = QUESTION_TIME;
         document.getElementById('start-screen').style.display = 'none';
+        startBgMusic();
         startCountdown();
     }
 
@@ -807,6 +1148,7 @@
             score += points;
             showToast(`✅ Correct! +${points}`, '#22c55e');
             addToHistory('Correct', `${num1} × ${num2} = ${chosen}`);
+            playCorrectSound();
         } else {
             btns[index].classList.add('wrong-flash');
             // Highlight correct answer
@@ -816,6 +1158,7 @@
             streak = 0;
             showToast(`❌ It was ${correctAnswer}`, '#ef4444');
             addToHistory('Incorrect', `${num1} × ${num2} = ${chosen} (Correct: ${correctAnswer})`);
+            playWrongSound();
         }
 
         updateHUD();
@@ -856,6 +1199,7 @@
         btns.forEach(b => { b.disabled = true; b.classList.remove('pressing'); });
         showToast(`⏰ Time's up! Answer: ${correctAnswer}`, '#f97316');
         addToHistory("Time's up", `${num1} × ${num2} = — (Correct: ${correctAnswer})`);
+        playTimeUpSound();
         updateHUD();
         updateProgressBar('incorrect');
         questionCount++;
@@ -894,16 +1238,21 @@
         isPaused = true;
         document.getElementById('pause-overlay').style.display = 'flex';
         addToHistory('Pause', `Paused at question ${questionCount + 1}: ${num1} × ${num2}`);
+        // Fade background music down while paused
+        if (bgGain) bgGain.gain.linearRampToValueAtTime(0, getAudioCtx().currentTime + 0.3);
     }
     function resumeGame() {
         isPaused = false;
         document.getElementById('pause-overlay').style.display = 'none';
         addToHistory('Resume', `Resumed at question ${questionCount + 1}: ${num1} × ${num2}`);
+        // Fade background music back in
+        if (bgGain) bgGain.gain.linearRampToValueAtTime(1.0, getAudioCtx().currentTime + 0.3);
     }
 
     /* ── End Quiz ── */
     function endQuiz() {
         clearInterval(timerInterval);
+        stopBgMusic();
         document.getElementById('question').style.display = 'none';
         document.getElementById('answers').style.visibility = 'hidden';
         document.getElementById('pause-btn').style.display = 'none';
@@ -914,6 +1263,7 @@
     }
 
     function restartQuiz() {
+        stopBgMusic();
         correctCount = 0; incorrectCount = 0; streak = 0; score = 0;
         questionCount = 0; isPaused = false; gameActive = false;
         document.getElementById('progressBar').innerHTML = '';
