@@ -315,6 +315,9 @@
         #score-card .sc-stat-v { font-size: 1.6em; font-weight: 900; }
         #score-card .sc-stat-l { font-size: .72em; color: #a0b4e8; text-transform: uppercase; letter-spacing: .08em; }
         #score-card .sc-footer { font-size: .75em; color: rgba(160,180,232,.5); margin-top: 8px; }
+        #score-card .sc-qr     { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 16px; }
+        #score-card .sc-qr-label { font-size: .68em; color: #a0b4e8; text-transform: uppercase; letter-spacing: .08em; }
+        #score-card .sc-qr img  { border-radius: 8px; background: #fff; padding: 6px; display: block; }
 
         /* ── Name prompt modal ── */
         #name-modal {
@@ -517,23 +520,26 @@
         }
         #pause-overlay button:active { transform: translateY(3px); box-shadow: 0 2px 0 #14532d; }
 
-        /* Pause button floating */
-        #pause-btn {
-            position: absolute;
-            top: 3.5%;
-            right: 3.5%;
-            z-index: 20;
-            background: rgba(10,20,60,.7);
-            border: 2px solid rgba(100,140,255,.35);
+        /* Pause & Mute buttons in HUD */
+        #pause-btn, #mute-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 20, 60, 0.75);
+            border: 2px solid rgba(100, 140, 255, 0.4);
+            border-radius: 14px;
+            padding: clamp(4px, 1.2cqh, 8px) clamp(8px, 2cqw, 16px);
+            backdrop-filter: blur(6px);
             color: #a0b4e8;
-            border-radius: 10px;
-            padding: 5px 12px;
-            font-size: .8em;
+            font-size: clamp(.85em, 2.5cqw, 1.4em);
             cursor: pointer;
             font-weight: 700;
             letter-spacing: .05em;
+            user-select: none;
+            flex: 0 0 auto;
+            z-index: 10;
         }
-        #pause-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
+        #pause-btn:hover, #mute-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
 
         /* ── Start Screen overlay ── */
         #start-screen {
@@ -634,24 +640,7 @@
         .level-btn.selected { border-color: #fbbf24; box-shadow: 0 0 0 3px #fbbf2466, 0 6px 0 currentColor; transform: translateY(-3px); }
         .level-btn:active   { transform: translateY(3px) !important; }
 
-        /* ── Mute button ── */
-        #mute-btn {
-            position: absolute;
-            top: 3.5%;
-            left: 3.5%;
-            z-index: 20;
-            background: rgba(10,20,60,.7);
-            border: 2px solid rgba(100,140,255,.35);
-            color: #a0b4e8;
-            border-radius: 10px;
-            padding: 5px 12px;
-            font-size: .8em;
-            cursor: pointer;
-            font-weight: 700;
-            letter-spacing: .05em;
-            user-select: none;
-        }
-        #mute-btn:hover { background: rgba(30,58,138,.8); color: #fff; }
+        /* ── Mute button — now in HUD, style handled above ── */
 
         /* History (hidden, print only) */
         .history { display: none; }
@@ -703,13 +692,7 @@
         <button id="start-btn" onclick="startGame()">▶ Start</button>
     </div>
 
-    <!-- Pause button -->
-    <button id="pause-btn" onclick="pauseGame()">⏸ Pause</button>
-
-    <!-- Mute button -->
-    <button id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
-
-    <!-- HUD -->
+    <!-- HUD (Score · Time · Streak · Mute · Pause) -->
     <div class="hud">
         <div class="hud-badge">
             <span class="hud-icon">⭐</span>
@@ -732,6 +715,8 @@
                 <span class="hud-value" id="streakValue">0</span>
             </div>
         </div>
+        <button id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+        <button id="pause-btn" onclick="pauseGame()">⏸</button>
     </div>
 
     <!-- Question -->
@@ -1452,7 +1437,7 @@
 
         try {
             const card   = document.getElementById('score-card');
-            const canvas = await html2canvas(card, { backgroundColor: null, scale: 2 });
+            const canvas = await html2canvas(card, { backgroundColor: null, scale: 2, useCORS: true });
             const blob   = await new Promise(res => canvas.toBlob(res, 'image/png'));
             const file   = new File([blob], 'math-tables-score.png', { type: 'image/png' });
             const text   = `🎉 ${playerName} scored ${score} on Math Tables Quiz!\n✅ ${correctCount} correct | 🎯 ${pct}% accuracy`;
@@ -1598,8 +1583,13 @@
             <span class="sc-stat-l">🎯 Accuracy</span>
         </div>
     </div>
-    <div class="sc-footer">mathtablesquiz.app</div>
+    <div class="sc-qr">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALkAAAC5CAIAAAD7zwkLAAAERUlEQVR4nO3dwW3tNhAF0P+DrFVDGkt1aSw1qAFnrwVxCc5QVHDO1n6SbF9QA3pI/v75+fkFgT+SbwJZYYJxhZSskJIVUrJCSlZIyQopWSH15/jL119//9ri/vefwX3HX+2779RnH8aXGn926lKFxk9lXCElK6RkhZSsUFTbrlRkhfXaVJ24UglOlavXsACfeqrxpaYecsrU78q4QkpWSMkKKVmhp7Z9KJzlnPrsuMbsc9eVq1PF7CF/BeMKKVkhJSukZIUttW2fvqnYqbq4r1Pibit1+xhXSMkKKVkhJSt8vLZdqSK3FaQrRfS4geFMxhVSskJKVkjJCltq276KbOrKK60CYyuV7103Xzx13z7GFVKyQkpWSMkKPbXtts7Wwv/Rr0zjFn71YWX6eNtf4cG4QkpWSMkKKVkh9fsTZze8Vc317Uhwf6EJ4cG4QkpWSMkKKVmhqLadqsgO2Ya1cO516r5TCqeAtzUUG1dIyQopWSElK/TUtm+VnGOfOMrhwR5g/J95B5GSFVKyQk9PQt+U6Nhb+yT0dQ5cbfO2K8zbUsM7iJSskJIVtpxLtjL5WLgQ66Fwn9lDemavhQK88JmNK6RkhZSskJIV3lhL1jdve+bWB9cZzciFZ5qZt6WGdxApWSElK3xtn4SVNoMVfQXpvWvBm/1tOY53EClZISUrbFlLVrji65ClZX03ul8qdfUk8ALvIFKyQkpWKOq3/URfwbbHeOhbSvfWMRB6EqjhHURKVkjJCkW1beFGq31l8spDfuJIhattK7KpbzaukJIVUrJCSlbo2SfhrarqrRNqV6Zir7a2ipXHGDNvSw3vIFKyQkpW2FLbfmJN17Yy+W6rXsefLdz8d8y4QkpWSMkKKVmhp7YtnIucalb9xHFh1xlboPUxrpCSFVKyQkpW2HJ2w8pnCyvBbcejXXVTon0LwPp+fOMKKVkhJSukZIUte4CNvXVg7ZmulzbwHd9oinGFlKyQkhVSskJPbdt3MFfhwbGFlW9hZ+tD35lmff0bxhVSskJKVkjJClvWkq30zD6c+R/8ba4j58cfjCukZIWUrJCSFd5YS7at8fNhW6/uwyG9EIW7N4wZV0jJCilZISUrFPUkvGVbXTzl3rVtwpk3Mq6QkhVSskJKVug5l6xPX8PpW8ci3HUTpoWNE9aSsYN3EClZISUrnLcH2MO2Xb4K+wqutgVgY4WnQqyUycYVUrJCSlZIyQrnnUv21n4FU1ceu3etQ+tbWva48tSPYFwhJSukZIWUrLCltt2m71iElSaEe2ZGuLBcdeYup/MOIiUrpGSFj9e2fTOkhVv0XruOVjvkVAjjCilZISUrpGSFN/a3/YRtjQR3XRfwtjJ5zLhCSlZIyQopWWHL/rZ9+hZEFS5LuxYe45CjxqYYV0jJCilZISUrfHx/Ww5kXCElK6RkhZSskJIVUrJCSlZIyQopWeFX6D/GXuwEGb22hwAAAABJRU5ErkJggg==" width="100" height="100" alt="Scan to play">
+        <span class="sc-qr-label">Scan to play</span>
+    </div>
+    <div class="sc-footer">https://shrevatsa-saaimurugan.github.io/tables/</div>
 </div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
         integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
