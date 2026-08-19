@@ -1440,7 +1440,7 @@
             const canvas = await html2canvas(card, { backgroundColor: null, scale: 2, useCORS: true });
             const blob   = await new Promise(res => canvas.toBlob(res, 'image/png'));
             const file   = new File([blob], 'math-tables-score.png', { type: 'image/png' });
-            const text   = `🎉 ${playerName} scored ${score} on Math Tables Quiz!\n✅ ${correctCount} correct | 🎯 ${pct}% accuracy | https://shrevatsa-saaimurugan.github.io/tables/`;
+            const text   = `🎉 ${playerName} scored ${score} on Math Tables Quiz!\n✅ ${correctCount} correct | 🎯 ${pct}% accuracy | https://shrevatsa-saaimurugan.github.io/Tables/`;
 
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({ title: 'Math Tables Quiz Score', text, files: [file] });
@@ -1587,7 +1587,7 @@
         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALkAAAC5CAIAAAD7zwkLAAAERUlEQVR4nO3dwW3tNhAF0P+DrFVDGkt1aSw1qAFnrwVxCc5QVHDO1n6SbF9QA3pI/v75+fkFgT+SbwJZYYJxhZSskJIVUrJCSlZIyQopWSH15/jL119//9ri/vefwX3HX+2779RnH8aXGn926lKFxk9lXCElK6RkhZSsUFTbrlRkhfXaVJ24UglOlavXsACfeqrxpaYecsrU78q4QkpWSMkKKVmhp7Z9KJzlnPrsuMbsc9eVq1PF7CF/BeMKKVkhJSukZIUttW2fvqnYqbq4r1Pibit1+xhXSMkKKVkhJSt8vLZdqSK3FaQrRfS4geFMxhVSskJKVkjJCltq276KbOrKK60CYyuV7103Xzx13z7GFVKyQkpWSMkKPbXtts7Wwv/Rr0zjFn71YWX6eNtf4cG4QkpWSMkKKVkh9fsTZze8Vc317Uhwf6EJ4cG4QkpWSMkKKVmhqLadqsgO2Ya1cO516r5TCqeAtzUUG1dIyQopWSElK/TUtm+VnGOfOMrhwR5g/J95B5GSFVKyQk9PQt+U6Nhb+yT0dQ5cbfO2K8zbUsM7iJSskJIVtpxLtjL5WLgQ66Fwn9lDemavhQK88JmNK6RkhZSskJIV3lhL1jdve+bWB9cZzciFZ5qZt6WGdxApWSElK3xtn4SVNoMVfQXpvWvBm/1tOY53EClZISUrbFlLVrji65ClZX03ul8qdfUk8ALvIFKyQkpWKOq3/URfwbbHeOhbSvfWMRB6EqjhHURKVkjJCkW1beFGq31l8spDfuJIhattK7KpbzaukJIVUrJCSlbo2SfhrarqrRNqV6Zir7a2ipXHGDNvSw3vIFKyQkpW2FLbfmJN17Yy+W6rXsefLdz8d8y4QkpWSMkKKVmhp7YtnIucalb9xHFh1xlboPUxrpCSFVKyQkpW2HJ2w8pnCyvBbcejXXVTon0LwPp+fOMKKVkhJSukZIUte4CNvXVg7ZmulzbwHd9oinGFlKyQkhVSskJPbdt3MFfhwbGFlW9hZ+tD35lmff0bxhVSskJKVkjJClvWkq30zD6c+R/8ba4j58cfjCukZIWUrJCSFd5YS7at8fNhW6/uwyG9EIW7N4wZV0jJCilZISUrFPUkvGVbXTzl3rVtwpk3Mq6QkhVSskJKVug5l6xPX8PpW8ci3HUTpoWNE9aSsYN3EClZISUrnLcH2MO2Xb4K+wqutgVgY4WnQqyUycYVUrJCSlZIyQrnnUv21n4FU1ceu3etQ+tbWva48tSPYFwhJSukZIWUrLCltt2m71iElSaEe2ZGuLBcdeYup/MOIiUrpGSFj9e2fTOkhVv0XruOVjvkVAjjCilZISUrpGSFN/a3/YRtjQR3XRfwtjJ5zLhCSlZIyQopWWHL/rZ9+hZEFS5LuxYe45CjxqYYV0jJCilZISUrfHx/Ww5kXCElK6RkhZSskJIVUrJCSlZIyQopWeFX6D/GXuwEGb22hwAAAABJRU5ErkJggg==" width="100" height="100" alt="Scan to play">
         <span class="sc-qr-label">Scan to play</span>
     </div>
-    <div class="sc-footer">https://shrevatsa-saaimurugan.github.io/tables/</div>
+    <div class="sc-footer">https://shrevatsa-saaimurugan.github.io/Tables/</div>
 </div>
 
 
