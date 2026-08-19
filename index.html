@@ -1440,7 +1440,7 @@
             const canvas = await html2canvas(card, { backgroundColor: null, scale: 2, useCORS: true });
             const blob   = await new Promise(res => canvas.toBlob(res, 'image/png'));
             const file   = new File([blob], 'math-tables-score.png', { type: 'image/png' });
-            const text   = `🎉 ${playerName} scored ${score} on Math Tables Quiz!\n✅ ${correctCount} correct | 🎯 ${pct}% accuracy`;
+            const text   = `🎉 ${playerName} scored ${score} on Math Tables Quiz!\n✅ ${correctCount} correct | 🎯 ${pct}% accuracy | https://shrevatsa-saaimurugan.github.io/tables/`;
 
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({ title: 'Math Tables Quiz Score', text, files: [file] });
