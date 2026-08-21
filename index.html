@@ -18,8 +18,17 @@
     </script>
     <link rel="icon" type="image/x-icon" href="logo.ico">
     <link rel="shortcut icon" type="image/x-icon" href="logo.ico">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a2e">
     <title>Tables Game</title>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
