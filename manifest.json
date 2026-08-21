@@ -1,0 +1,25 @@
+{
+  "name": "Tables Game",
+  "short_name": "MathTables",
+  "description": "Practice multiplication tables with a fun quiz game",
+  "start_url": "/Tables/",
+  "scope": "/Tables/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a0a2e",
+  "theme_color": "#0a0a2e",
+  "icons": [
+    {
+      "src": "logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
